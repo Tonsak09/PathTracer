@@ -3,8 +3,29 @@
 #include "ray.h"
 #include "vec3.h"
 
+double hit_sphere(const point3& center, double radius, const ray& r)
+{
+    vec3 oc = r.origin() - center;
+    double a = dot(r.direction(), r.direction());
+    double b = 2.0 * dot(oc, r.direction());
+    double c = dot(oc, oc) - radius * radius;
+    double discriminant = b * b - 4 * a * c;
+    
+    return (discriminant < 0) ? -1.0 : (-b - sqrt(discriminant)) / (2.0 * a);
+
+}
+
 color ray_color(const ray& r)
 {
+    // Test if it hits a sphere at pos -1 y and a radius of 0.5
+    double t = hit_sphere(point3(0, 0, -1), 0.5, r);
+    if (t > 0.0)
+    {
+        // Get normal and then shift the hue 
+        vec3 normal = unit_vector(r.at(t) - vec3(0, 0, -1));
+        return 0.5 * color(normal.x() + 1, normal.y() + 1, normal.z() + 1);
+    }
+
     vec3 unit_direction = unit_vector(r.direction());
     double a = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
